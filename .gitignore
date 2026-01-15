@@ -1,0 +1,38 @@
+SSM_System.db
+# Python cache
+__pycache__/
+**/__pycache__/
+
+# SQLite database file
+*.db
+
+# Environment files
+.env
+.env.*
+.env.local
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# Python
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Other
+instance/
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/

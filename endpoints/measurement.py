@@ -10,7 +10,7 @@ basic_auth = BasicAuth(app)
 @app.route('/api/measurement', methods = ['GET'])
 @basic_auth.required
 def measurements_get_measurements_by_id_GET():
-    """get measurements by plant id"""
+    """get all measurements"""
     start_date = request.args.get('start_date', 0)
     end_date = request.args.get('end_date', datetime.now().timestamp())
     limit = request.args.get('limit', 1000)
@@ -24,7 +24,7 @@ def measurements_get_measurements_by_id_GET():
 @app.route('/api/measurement/<id>', methods = ['GET'])
 @basic_auth.required
 def measurements_GET(id):
-    """get all measurements"""
+    """get measurements by plant id"""
     # {"sensor_list": 
     #   [{"sensor_id": sensor id, "plant_id": plant id, "alert_threshold": alert threshold, "last calibration_date": last calibration date}]
     # }

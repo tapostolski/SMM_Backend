@@ -1,0 +1,22 @@
+services:
+  web:
+    build: .
+    container_name: smm-backend
+    ports:
+      - "8067:8067"
+    env_file: .env
+    environment:
+      - FLASK_APP=server.py
+      - FLASK_ENV=production
+    volumes:
+      - ./database:/app/database
+      - ./endpoints:/app/endpoints
+      - ./utils:/app/utils
+    command: python server.py
+    networks:
+      - smm-network
+    restart: unless-stopped
+
+networks:
+  smm-network:
+    driver: bridge

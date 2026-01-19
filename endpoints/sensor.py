@@ -3,6 +3,7 @@ from database.db_wrapper import DbConnection
 from flask import request
 import json
 from flask_basicauth import BasicAuth
+from datetime import datetime
 
 basic_auth = BasicAuth(app)
 
@@ -44,3 +45,13 @@ def sensors_DELETE(id):
     db_connection = DbConnection()
     db_connection.delete_sensor(id)
     return "", 200
+
+@app.route('/api/sensors/<id>/calibrate', methods = ['POST'])
+@basic_auth.required
+def sensor_calibrate_POST(id):
+    """update sensor calibration date to current timestamp"""
+    timestamp = str(datetime.now().timestamp())
+    formatted_date = datetime.now().strftime('%d/%m/%Y')
+    db_connection = DbConnection()
+    db_connection.update_calibration_date(id, timestamp)
+    return {"message": f"Sensor {id} calibrated successfully", "calibration_date": formatted_date}, 200

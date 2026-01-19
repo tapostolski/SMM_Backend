@@ -20,8 +20,8 @@ global_db_connection.create_table()
 
 
 
-app.config['BASIC_AUTH_USERNAME'] = os.getenv('USERNAME')
-app.config['BASIC_AUTH_PASSWORD'] = os.getenv('PASSWORD')
+app.config['BASIC_AUTH_USERNAME'] = os.getenv('USERNAME', 'login')
+app.config['BASIC_AUTH_PASSWORD'] = os.getenv('PASSWORD', 'pass')
 #app.config['BASIC_AUTH_FORCE'] = True
 
 basic_auth = BasicAuth(app)
@@ -34,7 +34,6 @@ def login_GET():
     if 'Authorization' in header:
         auth_type, credentials = header['Authorization'].split(' ', 1)
         if auth_type.lower() == 'basic':
-            #username, password = credentials.encode('utf-8').decode('b64').split(':', 1)
             username, password = base64.b64decode(credentials).decode('utf-8').split(':', 1)
             if username == app.config['BASIC_AUTH_USERNAME'] and password == app.config['BASIC_AUTH_PASSWORD']:
                 return {"message": "Login successful"}, 200

@@ -66,3 +66,8 @@ class Sensors(BaseDbConnection):
         self.cursor.execute(f'DELETE FROM Sensors WHERE sensor_id = {id};')
         self.conn.commit()
 
+    def update_calibration_date(self, id, timestamp):
+        """updates last calibration date for sensor"""
+        self.cursor.execute(f'UPDATE Sensors SET last_calibration_date = {timestamp} WHERE sensor_id = {id};')
+        self.conn.commit()
+

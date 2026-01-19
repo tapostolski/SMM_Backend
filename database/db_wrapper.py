@@ -123,4 +123,7 @@ class DbConnection(BaseDbConnection):
         """deletes sensor from db"""
         return Sensors().delete(id)
 
-#TODO generate jakistam string from data
+    #UPDATE
+    def update_calibration_date(self, id, timestamp):
+        """updates sensor calibration date"""
+        return Sensors().update_calibration_date(id, timestamp)

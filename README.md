@@ -7,7 +7,8 @@ Do poprawnej instalacji potrzebny jest Docker, Docker Compose oraz Python. Proce
    PASSWORD=hasło_użytkownika
 2. Z gotowym plikiem .env możliwe jest zainstalowanie aplikacji poprzez uruchomienie polecenia **docker-compose up -d**.
 
-=========================================================================================================================================================================================================================
+========================================================================================================================================================================================
+
 
 This is a backend application for my soil moisture monitoring system.
 For proper instalation Docker, Docker Compose and Python is necessary. Instalation process goes as follows:
@@ -16,3 +17,4 @@ For proper instalation Docker, Docker Compose and Python is necessary. Instalati
    USERNAME=username
    PASSWORD=password
 2. With .env file ready you can set up application by running command **docker-compose up -d**.
+

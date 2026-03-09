@@ -1,4 +1,4 @@
-﻿# CSMS_backend
+﻿# SMM_Backend
 
 Jest to aplikacja backendowa do mojego systemu monitoringu wilgotności ziemi.
 Do poprawnej instalacji potrzebny jest Docker, Docker Compose oraz Python. Proces instalacji przebiega następująco:
@@ -17,4 +17,5 @@ For proper instalation Docker, Docker Compose and Python is necessary. Instalati
    USERNAME=username
    PASSWORD=password
 2. With .env file ready you can set up application by running command **docker-compose up -d**.
+
 

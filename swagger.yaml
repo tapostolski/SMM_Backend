@@ -1,0 +1,760 @@
+openapi: 3.0.4
+info:
+  title: Plant Monitoring API
+  description: API do systemu monitorowania wilgotności gleby roślin doniczkowych SMMS
+  version: 1.0.0
+servers:
+  - url: http://localhost:8067
+    description: Development server
+
+components:
+  schemas:
+    Plant:
+      type: object
+      properties:
+        plant_id:
+          type: integer
+          format: int64
+          example: 1
+        plant_specie:
+          type: string
+          example: "Monstera deliciosa"
+        plant_name:
+          type: string
+          example: "Monstera w salonie"
+      required:
+        - plant_specie
+        - plant_name
+
+    PlantCreate:
+      type: object
+      properties:
+        plant_specie:
+          type: string
+          example: "Monstera deliciosa"
+        plant_name:
+          type: string
+          example: "Monstera w salonie"
+      required:
+        - plant_specie
+        - plant_name
+
+    PlantUpdate:
+      type: object
+      properties:
+        alert_threshold:
+          type: number
+          format: float
+          example: 50.5
+        plant_specie:
+          type: string
+          example: "Updated specie"
+        plant_name:
+          type: string
+          example: "Updated name"
+
+    Sensor:
+      type: object
+      properties:
+        sensor_id:
+          type: integer
+          format: int64
+          example: 1
+        plant_id:
+          type: integer
+          format: int64
+          example: 1
+        alert_threshold:
+          type: number
+          format: float
+          example: 50.5
+        last_calibration_date:
+          type: string
+          format: date-time
+          example: "2023-01-15T10:30:00Z"
+
+    SensorUpdate:
+      type: object
+      properties:
+        plant_id:
+          type: integer
+          format: int64
+          example: 2
+        alert_threshold:
+          type: number
+          format: float
+          example: 60.0
+
+    SensorData:
+      type: object
+      properties:
+        sensor_id:
+          type: integer
+          example: 1
+        moisture:
+          type: number
+          format: float
+          example: 45.5
+        temperature:
+          type: number
+          format: float
+          example: 22.5
+        light:
+          type: integer
+          example: 500
+      required:
+        - sensor_id
+        - moisture
+
+    Alert:
+      type: object
+      properties:
+        alert_id:
+          type: integer
+          format: int64
+          example: 1
+        plant_id:
+          type: integer
+          format: int64
+          example: 1
+        sensor_id:
+          type: integer
+          format: int64
+          example: 1
+        measurement_id:
+          type: integer
+          format: int64
+          example: 100
+        alert_timestamp:
+          type: string
+          format: date-time
+          example: "2023-01-20T14:30:00Z"
+
+    Measurement:
+      type: object
+      properties:
+        measurement_id:
+          type: integer
+          format: int64
+          example: 1
+        plant_id:
+          type: integer
+          format: int64
+          example: 1
+        sensor_id:
+          type: integer
+          format: int64
+          example: 1
+        measurement_value:
+          type: number
+          format: float
+          example: 45.5
+        measurement_timestamp:
+          type: string
+          format: date-time
+          example: "2023-01-20T14:25:00Z"
+
+    PlantsResponse:
+      type: object
+      properties:
+        plant_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plant'
+
+    PlantResponse:
+      type: object
+      properties:
+        plant_id:
+          type: integer
+          example: 1
+
+    SensorsResponse:
+      type: object
+      properties:
+        sensor_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+
+    AlertsResponse:
+      type: object
+      properties:
+        alert_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+
+    MeasurementsResponse:
+      type: object
+      properties:
+        measurement_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Measurement'
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Login successful"
+
+    CalibrationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Sensor 1 calibrated successfully"
+        calibration_date:
+          type: string
+          example: "20/01/2023"
+
+    SensorPostResponse:
+      type: object
+      properties:
+        response:
+          type: integer
+          example: 150
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "NOT_FOUND"
+        message:
+          type: string
+          example: "Resource not found"
+      required:
+        - code
+        - message
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Basic authentication using username and password
+
+security:
+  - basicAuth: []
+
+paths:
+  /api/login:
+    get:
+      summary: Logowanie użytkownika
+      description: Autoryzacja użytkownika za pomocą Basic Auth
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Logowanie udane
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Nieprawidłowe dane logowania
+      security: []
+    
+    options:
+      summary: Preflight request dla logowania
+      description: Obsługa CORS dla metody OPTIONS
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Preflight OK
+      security: []
+
+  /sensor:
+    post:
+      summary: Przyjmuje dane z sensora
+      description: Endpoint do przesyłania danych z sensorów roślin
+      tags:
+        - Sensors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorData'
+      responses:
+        '200':
+          description: Dane z sensora przyjęte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorPostResponse'
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/plants:
+    get:
+      summary: Pobierz listę wszystkich roślin
+      description: Zwraca listę wszystkich roślin w systemie
+      tags:
+        - Plants
+      responses:
+        '200':
+          description: Lista roślin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlantsResponse'
+        '401':
+          description: Nieautoryzowany dostęp
+
+    post:
+      summary: Dodaj nową roślinę
+      description: Tworzy nową roślinę w systemie
+      tags:
+        - Plants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlantCreate'
+      responses:
+        '200':
+          description: Roślina została dodana
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlantResponse'
+        '400':
+          description: Nieprawidłowe dane wejściowe
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/plants/{id}:
+    get:
+      summary: Pobierz roślinę po ID
+      description: Zwraca szczegóły konkretnej rośliny
+      tags:
+        - Plants
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID rośliny
+      responses:
+        '200':
+          description: Szczegóły rośliny
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plant'
+        '404':
+          description: Roślina nie znaleziona
+        '401':
+          description: Nieautoryzowany dostęp
+
+    patch:
+      summary: Zaktualizuj roślinę
+      description: Aktualizuje dane rośliny
+      tags:
+        - Plants
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID rośliny
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlantUpdate'
+      responses:
+        '200':
+          description: Roślina zaktualizowana
+        '404':
+          description: Roślina nie znaleziona
+        '401':
+          description: Nieautoryzowany dostęp
+
+    delete:
+      summary: Usuń roślinę
+      description: Usuwa roślinę z systemu
+      tags:
+        - Plants
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID rośliny
+      responses:
+        '200':
+          description: Roślina usunięta
+        '404':
+          description: Roślina nie znaleziona
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/plants/{id}/measurements:
+    get:
+      summary: Pobierz pomiary dla rośliny
+      description: Zwraca listę pomiarów dla konkretnej rośliny
+      tags:
+        - Plants
+        - Measurements
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID rośliny
+        - name: start_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp początkowy (domyślnie 0)
+        - name: end_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp końcowy (domyślnie obecny czas)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 1000
+          description: Limit wyników (domyślnie 1000)
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Offset wyników (domyślnie 0)
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+          description: Kolejność sortowania
+      responses:
+        '200':
+          description: Lista pomiarów
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeasurementsResponse'
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/plants/{id}/alerts:
+    get:
+      summary: Pobierz alerty dla rośliny
+      description: Zwraca listę alertów dla konkretnej rośliny
+      tags:
+        - Plants
+        - Alerts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID rośliny
+        - name: start_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp początkowy (domyślnie 0)
+        - name: end_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp końcowy (domyślnie obecny czas)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 1000
+          description: Limit wyników (domyślnie 1000)
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Offset wyników (domyślnie 0)
+      responses:
+        '200':
+          description: Lista alertów
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertsResponse'
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/sensors:
+    get:
+      summary: Pobierz listę wszystkich sensorów
+      description: Zwraca listę wszystkich sensorów w systemie
+      tags:
+        - Sensors
+      responses:
+        '200':
+          description: Lista sensorów
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorsResponse'
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/sensors/{id}:
+    get:
+      summary: Pobierz sensor po ID
+      description: Zwraca szczegóły konkretnego sensora
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID sensora
+      responses:
+        '200':
+          description: Szczegóły sensora
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '404':
+          description: Sensor nie znaleziony
+        '401':
+          description: Nieautoryzowany dostęp
+
+    patch:
+      summary: Zaktualizuj sensor
+      description: Aktualizuje dane sensora
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID sensora
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorUpdate'
+      responses:
+        '200':
+          description: Sensor zaktualizowany
+        '404':
+          description: Sensor nie znaleziony
+        '401':
+          description: Nieautoryzowany dostęp
+
+    delete:
+      summary: Usuń sensor
+      description: Usuwa sensor z systemu
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID sensora
+      responses:
+        '200':
+          description: Sensor usunięty
+        '404':
+          description: Sensor nie znaleziony
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/sensors/{id}/calibrate:
+    post:
+      summary: Kalibruj sensor
+      description: Aktualizuje datę kalibracji sensora na obecną datę
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID sensora
+      responses:
+        '200':
+          description: Sensor skalibrowany
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationResponse'
+        '404':
+          description: Sensor nie znaleziony
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/alerts:
+    get:
+      summary: Pobierz listę alertów
+      description: Zwraca listę alertów z opcjonalnymi filtrami
+      tags:
+        - Alerts
+      parameters:
+        - name: start_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp początkowy (domyślnie 0)
+        - name: end_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp końcowy (domyślnie obecny czas)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 35040
+          description: Limit wyników (domyślnie 35040)
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Offset wyników (domyślnie 0)
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+          description: Kolejność sortowania
+      responses:
+        '200':
+          description: Lista alertów
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertsResponse'
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/alerts/{id}:
+    get:
+      summary: Pobierz alert po ID
+      description: Zwraca szczegóły konkretnego alertu
+      tags:
+        - Alerts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID alertu
+      responses:
+        '200':
+          description: Szczegóły alertu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+        '404':
+          description: Alert nie znaleziony
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/measurement:
+    get:
+      summary: Pobierz wszystkie pomiary
+      description: Zwraca listę wszystkich pomiarów z opcjonalnymi filtrami
+      tags:
+        - Measurements
+      parameters:
+        - name: start_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp początkowy (domyślnie 0)
+        - name: end_date
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Timestamp końcowy (domyślnie obecny czas)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 1000
+          description: Limit wyników (domyślnie 1000)
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Offset wyników (domyślnie 0)
+        - name: every
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Co który pomiar zwrócić (0 = wszystkie)
+      responses:
+        '200':
+          description: Lista pomiarów
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeasurementsResponse'
+        '401':
+          description: Nieautoryzowany dostęp
+
+  /api/measurement/{id}:
+    get:
+      summary: Pobierz pomiary dla rośliny po ID
+      description: Zwraca listę pomiarów dla konkretnej rośliny
+      tags:
+        - Measurements
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID rośliny
+      responses:
+        '200':
+          description: Lista pomiarów
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeasurementsResponse'
+        '404':
+          description: Roślina nie znaleziona
+        '401':
+          description: Nieautoryzowany dostęp

@@ -8,6 +8,9 @@ from flask_basicauth import BasicAuth
 from flask import make_response
 import base64
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #initialize flask app
 app = Flask("SMM backend")
@@ -72,4 +75,4 @@ def sensor_handle_POST():
 
     return {"response": measurement_id}
 
-app.run("0.0.0.0", 8067)
+app.run(os.getenv('IP_ADDRESS', '0.0.0.0'), int(os.getenv('PORT', 8067)))
